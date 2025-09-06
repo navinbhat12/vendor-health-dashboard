@@ -431,6 +431,57 @@ async def initialize_target_vendors(
     }
 
 
+@router.post("/populate-market-cap")
+async def populate_market_cap_data(db: Session = Depends(get_database)):
+    """Populate market cap and description data for all vendors"""
+    
+    # Real data from our fresh API key
+    vendor_data = {
+        'TEL': {
+            'market_cap': 61678911000,
+            'name': 'TE Connectivity Ltd',
+            'description': 'TE Connectivity is an American Swiss-domiciled technology company that designs and manufactures connectivity and sensor solutions for a variety of industries, including automotive, aerospace, defense, medical, and consumer electronics.'
+        },
+        'ST': {
+            'market_cap': 4695406000,
+            'name': 'Sensata Technologies Holding NV',
+            'description': 'Sensata Technologies Holding plc, develops, manufactures, and sells sensors, sensor-based solutions, controls, and other products in the Americas, Europe, Asia, and internationally.'
+        },
+        'DD': {
+            'market_cap': 32584557000,
+            'name': 'Dupont De Nemours Inc',
+            'description': 'DuPont de Nemours, Inc., commonly known as DuPont, is an American multinational chemical company first formed in 1802 to manufacture gunpowder.'
+        },
+        'CE': {
+            'market_cap': 5336130000,
+            'name': 'Celanese Corporation',
+            'description': 'Celanese Corporation is a Fortune 500 global technology leader in chemistry that builds on its expertise to create value for its customers, shareholders and the corporation.'
+        },
+        'LYB': {
+            'market_cap': 17716371000,
+            'name': 'LyondellBasell Industries NV',
+            'description': 'LyondellBasell Industries N.V. is a Dutch multinational chemical company with American origins, incorporated in the Netherlands, with U.S. operations headquartered in Houston, Texas, and offices around the world.'
+        }
+    }
+    
+    updated_vendors = []
+    
+    for ticker, data in vendor_data.items():
+        vendor = db.query(Vendor).filter(Vendor.ticker == ticker).first()
+        if vendor:
+            vendor.market_cap = data['market_cap']
+            vendor.description = data['description']
+            vendor.name = data['name']
+            updated_vendors.append(ticker)
+    
+    db.commit()
+    
+    return {
+        "message": "Market cap and description data populated successfully",
+        "updated_vendors": updated_vendors
+    }
+
+
 async def fetch_financial_data(
     ticker: str,
     av_service: AlphaVantageService
