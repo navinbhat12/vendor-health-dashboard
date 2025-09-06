@@ -1,23 +1,80 @@
 import httpx
 import json
+import os
 from typing import Optional, Dict, Any, List
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
 from app.config import settings
 import asyncio
 import logging
+
+# Load environment variables
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 
 class AlphaVantageService:
-    """Service for interacting with Alpha Vantage API"""
+    """Service for interacting with Alpha Vantage API with key rotation support"""
     
     def __init__(self):
         self.base_url = settings.alpha_vantage_base_url
-        self.api_key = settings.alpha_vantage_api_key
+        self.current_key_index = 0
         self.client = httpx.AsyncClient(timeout=30.0)
         self._last_request_time = None
         self._min_interval = 60 / settings.requests_per_minute  # seconds between requests
+        self._key_usage_count = {}  # Track usage per key - initialize first
+        self.api_keys = self._load_api_keys()  # Load keys after initializing usage tracker
+        
+    def _load_api_keys(self) -> List[str]:
+        """Load all available API keys from environment variables"""
+        keys = []
+        
+        # Primary key
+        primary_key = settings.alpha_vantage_api_key
+        if primary_key:
+            keys.append(primary_key)
+        
+        # Additional keys
+        i = 1
+        while True:
+            additional_key = os.getenv(f'ALPHA_VANTAGE_API_KEY_{i}')
+            if additional_key:
+                keys.append(additional_key)
+                i += 1
+            else:
+                break
+        
+        logger.info(f"Loaded {len(keys)} API key(s) for rotation")
+        
+        # Initialize usage tracking
+        for key in keys:
+            self._key_usage_count[key] = 0
+            
+        return keys
+    
+    def get_current_api_key(self) -> str:
+        """Get the current API key for requests"""
+        if not self.api_keys:
+            raise ValueError("No API keys available")
+        return self.api_keys[self.current_key_index]
+    
+    def rotate_api_key(self):
+        """Rotate to the next available API key"""
+        if len(self.api_keys) > 1:
+            old_key = self.get_current_api_key()
+            self.current_key_index = (self.current_key_index + 1) % len(self.api_keys)
+            new_key = self.get_current_api_key()
+            logger.info(f"Rotated from key {old_key[:8]}... to {new_key[:8]}...")
+    
+    def get_key_status(self) -> Dict[str, Any]:
+        """Get status information about all keys"""
+        return {
+            "total_keys": len(self.api_keys),
+            "current_key": f"{self.get_current_api_key()[:8]}..." if self.api_keys else "None",
+            "current_index": self.current_key_index,
+            "usage_counts": {f"{key[:8]}...": count for key, count in self._key_usage_count.items()}
+        }
     
     async def _rate_limit_delay(self):
         """Ensure we don't exceed rate limits"""
@@ -30,42 +87,63 @@ class AlphaVantageService:
         self._last_request_time = datetime.now()
     
     async def _make_request(self, function: str, symbol: str, **kwargs) -> Optional[Dict[str, Any]]:
-        """Make a request to Alpha Vantage API with rate limiting"""
-        await self._rate_limit_delay()
+        """Make a request to Alpha Vantage API with rate limiting and key rotation"""
+        max_retries = len(self.api_keys)
         
-        params = {
-            "function": function,
-            "symbol": symbol,
-            "apikey": self.api_key,
-            **kwargs
-        }
+        for attempt in range(max_retries):
+            await self._rate_limit_delay()
+            
+            current_key = self.get_current_api_key()
+            params = {
+                "function": function,
+                "symbol": symbol,
+                "apikey": current_key,
+                **kwargs
+            }
+            
+            try:
+                response = await self.client.get(self.base_url, params=params)
+                response.raise_for_status()
+                
+                data = response.json()
+                
+                # Track usage for this key
+                self._key_usage_count[current_key] += 1
+                
+                # Check for API error messages
+                if "Error Message" in data:
+                    logger.error(f"Alpha Vantage API error: {data['Error Message']}")
+                    return None
+                
+                # Check for rate limiting or API limit messages
+                if "Note" in data or "Information" in data:
+                    message = data.get("Note") or data.get("Information", "")
+                    logger.warning(f"Alpha Vantage API message: {message}")
+                    
+                    # If rate limited and we have more keys, rotate and retry
+                    if ("rate limit" in message.lower() or "premium" in message.lower()) and len(self.api_keys) > 1:
+                        logger.info(f"Rate limited on key {current_key[:8]}..., rotating to next key")
+                        self.rotate_api_key()
+                        continue
+                    
+                    return None
+                
+                logger.debug(f"Successful API call for {function}/{symbol} using key {current_key[:8]}...")
+                return data
+                
+            except httpx.HTTPError as e:
+                logger.error(f"HTTP error fetching {function} for {symbol}: {e}")
+                # Don't rotate on HTTP errors, they're usually not rate limit related
+                return None
+            except json.JSONDecodeError as e:
+                logger.error(f"JSON decode error for {symbol}: {e}")
+                return None
+            except Exception as e:
+                logger.error(f"Unexpected error fetching {function} for {symbol}: {e}")
+                return None
         
-        try:
-            response = await self.client.get(self.base_url, params=params)
-            response.raise_for_status()
-            
-            data = response.json()
-            
-            # Check for API error messages
-            if "Error Message" in data:
-                logger.error(f"Alpha Vantage API error: {data['Error Message']}")
-                return None
-            
-            if "Note" in data:
-                logger.warning(f"Alpha Vantage API note: {data['Note']}")
-                return None
-            
-            return data
-            
-        except httpx.HTTPError as e:
-            logger.error(f"HTTP error fetching {function} for {symbol}: {e}")
-            return None
-        except json.JSONDecodeError as e:
-            logger.error(f"JSON decode error for {symbol}: {e}")
-            return None
-        except Exception as e:
-            logger.error(f"Unexpected error fetching {function} for {symbol}: {e}")
-            return None
+        logger.error(f"Failed to fetch {function} for {symbol} after trying all {max_retries} API keys")
+        return None
     
     async def get_balance_sheet(self, symbol: str) -> Optional[Dict[str, Any]]:
         """Get balance sheet data for a symbol"""
@@ -85,8 +163,8 @@ class AlphaVantageService:
             return []
         
         parsed_reports = []
-        # Use only the most recent report (latest year)
-        for report in data["annualReports"][:3]:  # Keep last 3 years for trend analysis
+        # Use the most recent 10 years for comprehensive trend analysis
+        for report in data["annualReports"][:10]:
             try:
                 parsed_report = {
                     "ticker": data.get("symbol"),
@@ -142,8 +220,8 @@ class AlphaVantageService:
             return []
         
         parsed_reports = []
-        # Use the most recent 3 years for trend analysis
-        for report in data["annualReports"][:3]:
+        # Use the most recent 10 years for comprehensive trend analysis
+        for report in data["annualReports"][:10]:
             try:
                 parsed_report = {
                     "ticker": data.get("symbol"),
@@ -178,8 +256,8 @@ class AlphaVantageService:
             return []
         
         parsed_reports = []
-        # Use the most recent 3 years for trend analysis
-        for report in data["annualReports"][:3]:
+        # Use the most recent 10 years for comprehensive trend analysis
+        for report in data["annualReports"][:10]:
             try:
                 parsed_report = {
                     "ticker": data.get("symbol"),

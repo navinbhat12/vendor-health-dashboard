@@ -8,6 +8,7 @@ class VendorBase(BaseModel):
     name: str
     sector: Optional[str] = None
     industry: Optional[str] = None
+    market_cap: Optional[float] = None
 
 
 class VendorCreate(VendorBase):
@@ -276,6 +277,9 @@ class VendorSummary(BaseModel):
 
     # Cash Quality metrics
     ocf_to_net_income: Optional[float] = None
+
+    # Market Data
+    market_cap: Optional[float] = None
 
     # Flags
     liquidity_flag: bool = False

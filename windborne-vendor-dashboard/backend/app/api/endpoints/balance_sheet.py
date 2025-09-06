@@ -28,7 +28,7 @@ router = APIRouter()
 _comparison_cache = {
     "data": None,
     "timestamp": None,
-    "ttl_hours": 1  # Cache for 1 hour
+    "ttl_hours": 24  # Cache for 24 hours
 }
 
 # Target vendors for WindBorne Systems
@@ -249,6 +249,8 @@ def _get_vendor_summary_data(ticker: str, db: Session) -> VendorSummary:
         revenue_cagr_3y=latest_profitability_metrics.revenue_cagr_3y if latest_profitability_metrics else None,
         # Cash Quality metrics
         ocf_to_net_income=latest_profitability_metrics.ocf_to_net_income if latest_profitability_metrics else None,
+        # Market Data (from vendor table)
+        market_cap=vendor.market_cap,
         # Flags
         liquidity_flag=latest_metrics.liquidity_flag if latest_metrics else False,
         leverage_flag=latest_metrics.leverage_flag if latest_metrics else False,
@@ -266,7 +268,7 @@ async def get_vendor_summary(ticker: str, db: Session = Depends(get_database)):
 
 @router.get("/comparison", response_model=VendorComparison)
 async def get_vendor_comparison(db: Session = Depends(get_database)):
-    """Get comparison data for all vendors with 1-hour caching"""
+    """Get comparison data for all vendors with 24-hour caching"""
     
     # Check cache first
     cached_result = _get_cached_comparison()
@@ -307,6 +309,79 @@ async def clear_comparison_cache():
     """Clear the vendor comparison cache"""
     _invalidate_comparison_cache()
     return {"message": "Comparison cache cleared successfully"}
+
+
+@router.get("/keys/status")
+async def get_api_key_status(av_service: AlphaVantageService = Depends(get_alphavantage_service)):
+    """Get status of API key rotation system"""
+    return av_service.get_key_status()
+
+
+@router.get("/vendors/{ticker}/overview")
+async def get_vendor_overview(ticker: str, av_service: AlphaVantageService = Depends(get_alphavantage_service)):
+    """Get company overview data for a vendor"""
+    ticker = ticker.upper()
+    
+    try:
+        overview_data = await av_service.get_company_overview(ticker)
+        if not overview_data:
+            raise HTTPException(status_code=404, detail="Company overview not found")
+        
+        return overview_data
+    except Exception as e:
+        logger.error(f"Error fetching overview for {ticker}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch company overview")
+
+
+@router.get("/vendors/{ticker}/trends")
+async def get_vendor_trends(ticker: str, db: Session = Depends(get_database)):
+    """Get historical trends data for charts (last 10 years)"""
+    ticker = ticker.upper()
+    
+    try:
+        # Get income statement data for trends
+        income_statements = (
+            db.query(IncomeStatementData)
+            .filter(IncomeStatementData.ticker == ticker)
+            .order_by(desc(IncomeStatementData.fiscal_date_ending))
+            .limit(10)  # Last 10 years
+            .all()
+        )
+        
+        if not income_statements:
+            raise HTTPException(status_code=404, detail="No trends data found for vendor")
+        
+        # Format data for charting
+        trends_data = []
+        for record in reversed(income_statements):  # Reverse to show chronological order
+            # Handle both datetime and string fiscal_date_ending
+            if record.fiscal_date_ending:
+                if isinstance(record.fiscal_date_ending, str):
+                    fiscal_year = record.fiscal_date_ending[:4]  # Extract year from string like "2024-12-31"
+                    fiscal_date = record.fiscal_date_ending
+                else:
+                    fiscal_year = record.fiscal_date_ending.strftime("%Y")
+                    fiscal_date = record.fiscal_date_ending.isoformat()
+            else:
+                fiscal_year = "Unknown"
+                fiscal_date = None
+                
+            trends_data.append({
+                "fiscal_year": fiscal_year,
+                "fiscal_date_ending": fiscal_date,
+                "total_revenue": float(record.total_revenue) if record.total_revenue else None,
+                "net_income": float(record.net_income) if record.net_income else None,
+                "operating_income": float(record.operating_income) if record.operating_income else None,
+                "gross_profit": float(record.gross_profit) if record.gross_profit else None
+            })
+        
+        return {
+            "ticker": ticker,
+            "trends": trends_data
+        }
+    except Exception as e:
+        logger.error(f"Error in get_vendor_trends for {ticker}: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 @router.post("/initialize-vendors")
@@ -369,8 +444,36 @@ async def fetch_financial_data(
                 vendor.name = overview_data.get("Name", vendor.name)
                 vendor.sector = overview_data.get("Sector", vendor.sector)
                 vendor.industry = overview_data.get("Industry", vendor.industry)
+                
+                # Update market cap if available
+                if "MarketCapitalization" in overview_data:
+                    market_cap_str = overview_data["MarketCapitalization"]
+                    if market_cap_str and market_cap_str != "None":
+                        try:
+                            vendor.market_cap = float(market_cap_str)
+                            logger.info(f"Updated market cap for {ticker}: ${vendor.market_cap:,.0f}")
+                        except (ValueError, TypeError):
+                            logger.warning(f"Invalid market cap format for {ticker}: {market_cap_str}")
+                
                 db.commit()
                 logger.info(f"Updated company info for {ticker}: {vendor.name}")
+        
+        # For all vendors, try to fetch/update market cap if not already present
+        if vendor and vendor.market_cap is None:
+            logger.info(f"Fetching market cap for {ticker}")
+            try:
+                overview_data = await av_service.get_company_overview(ticker)
+                if overview_data and "MarketCapitalization" in overview_data:
+                    market_cap_str = overview_data["MarketCapitalization"]
+                    if market_cap_str and market_cap_str != "None":
+                        try:
+                            vendor.market_cap = float(market_cap_str)
+                            logger.info(f"Updated market cap for {ticker}: ${vendor.market_cap:,.0f}")
+                            db.commit()
+                        except (ValueError, TypeError):
+                            logger.warning(f"Invalid market cap format for {ticker}: {market_cap_str}")
+            except Exception as e:
+                logger.warning(f"Failed to fetch market cap for {ticker}: {e}")
         
         # Fetch balance sheet data from Alpha Vantage
         balance_sheet_data = await av_service.get_balance_sheet(ticker)

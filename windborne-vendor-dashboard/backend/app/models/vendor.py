@@ -11,6 +11,7 @@ class Vendor(Base):
     name = Column(String(255), nullable=False)
     sector = Column(String(100))
     industry = Column(String(100))
+    market_cap = Column(Float)  # Store market cap from overview data
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

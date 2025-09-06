@@ -52,6 +52,12 @@ export const vendorApi = {
     return response.data;
   },
 
+  // Get company overview
+  getVendorOverview: async (ticker: string): Promise<any> => {
+    const response = await api.get(`/vendors/${ticker}/overview`);
+    return response.data;
+  },
+
   // Get comparison data for all vendors
   getVendorComparison: async (): Promise<VendorComparison> => {
     const response = await api.get<VendorComparison>("/comparison");

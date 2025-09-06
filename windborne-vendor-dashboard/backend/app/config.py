@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     
     # Rate Limiting Configuration
     requests_per_minute: int = Field(default=5, env="REQUESTS_PER_MINUTE")
-    cache_expiry_hours: int = Field(default=1, env="CACHE_EXPIRY_HOURS")
+    cache_expiry_hours: int = Field(default=24, env="CACHE_EXPIRY_HOURS")
     
     # CORS Configuration
     allowed_origins: List[str] = Field(
@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = False
+        extra = "ignore"  # Allow extra environment variables
 
 
 # Global settings instance

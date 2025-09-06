@@ -96,9 +96,9 @@ export default function VendorCard({
         </div>
 
         <div>
-          <p className="metric-label">Total Equity</p>
+          <p className="metric-label">Cash & Equivalents</p>
           <p className="metric-value text-lg">
-            {formatCurrency(vendor.total_shareholder_equity, true)}
+            {formatCurrency(vendor.cash_and_cash_equivalents, true)}
           </p>
         </div>
       </div>

@@ -134,10 +134,33 @@ export interface TrendData {
   operating_cash_flow?: number;
 }
 
+export interface TrendPoint {
+  fiscal_year: string;
+  fiscal_date_ending: string;
+  total_revenue?: number;
+  net_income?: number;
+  operating_income?: number;
+  gross_profit?: number;
+}
+
 export interface VendorTrends {
   ticker: string;
-  name: string;
-  trends: TrendData[];
+  trends: TrendPoint[];
+}
+
+export interface CompanyOverview {
+  Symbol: string;
+  Name: string;
+  Description: string;
+  Sector: string;
+  Industry: string;
+  Exchange: string;
+  MarketCapitalization: string;
+  PERatio: string;
+  DividendYield: string;
+  "52WeekHigh": string;
+  "52WeekLow": string;
+  [key: string]: string; // For additional fields
 }
 
 export interface ApiResponse<T> {
