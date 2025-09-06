@@ -2,7 +2,17 @@ import asyncio
 import httpx
 
 async def test_api():
-    url = 'https://www.alphavantage.co/query?function=BALANCE_SHEET&symbol=IBM&apikey=3SH8I6KZFECR4OLC'
+    # Use environment variable for API key
+    import os
+    from dotenv import load_dotenv
+    load_dotenv()
+    
+    api_key = os.getenv('ALPHA_VANTAGE_API_KEY')
+    if not api_key:
+        print('❌ No API key found in environment variables')
+        return
+        
+    url = f'https://www.alphavantage.co/query?function=BALANCE_SHEET&symbol=IBM&apikey={api_key}'
     async with httpx.AsyncClient() as client:
         response = await client.get(url)
         data = response.json()
