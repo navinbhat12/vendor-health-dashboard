@@ -14,7 +14,8 @@ class Settings(BaseSettings):
     # Database Configuration
     database_url: str = Field(
         default="sqlite:///./vendor_data.db",
-        env="DATABASE_URL"
+        env="DATABASE_URL",
+        description="Database URL. Use postgresql://user:pass@host:port/db for PostgreSQL"
     )
     
     # Application Configuration
