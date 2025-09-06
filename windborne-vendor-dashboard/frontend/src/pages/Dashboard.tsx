@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { RefreshCw, Download } from "lucide-react";
+import { RefreshCw, Download, Table } from "lucide-react";
+import { Link } from "react-router-dom";
 import VendorCard from "../components/VendorCard";
 import AddVendorCard from "../components/AddVendorCard";
 import { vendorApi } from "../services/api";
@@ -185,6 +186,11 @@ export default function Dashboard() {
         </div>
 
         <div className="flex items-center space-x-3">
+          <Link to="/comparison" className="btn btn-primary">
+            <Table className="w-4 h-4 mr-2" />
+            View Comparison Table
+          </Link>
+
           <button
             onClick={loadComparison}
             className="btn btn-secondary"
@@ -200,7 +206,7 @@ export default function Dashboard() {
             onClick={() => {
               /* TODO: Implement CSV export */
             }}
-            className="btn btn-primary"
+            className="btn btn-secondary"
           >
             <Download className="w-4 h-4 mr-2" />
             Export CSV

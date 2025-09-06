@@ -73,4 +73,21 @@
   .flag-danger {
     @apply flag-badge bg-danger-900 text-danger-200;
   }
+
+  /* Table styles for comparison */
+  .comparison-table {
+    @apply min-w-full;
+  }
+
+  .comparison-table th {
+    @apply text-xs font-medium text-secondary-300 uppercase tracking-wider;
+  }
+
+  .comparison-table td {
+    @apply whitespace-nowrap;
+  }
+
+  .category-header {
+    @apply sticky top-0 z-10;
+  }
 }

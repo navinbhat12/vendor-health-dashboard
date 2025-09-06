@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Building2, BarChart3, TrendingUp } from "lucide-react";
+import { Building2, BarChart3, TrendingUp, Table } from "lucide-react";
 
 interface LayoutProps {
   children: ReactNode;
@@ -42,6 +42,18 @@ export default function Layout({ children }: LayoutProps) {
               >
                 <BarChart3 className="w-4 h-4" />
                 <span>Dashboard</span>
+              </Link>
+
+              <Link
+                to="/comparison"
+                className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  location.pathname === "/comparison"
+                    ? "bg-primary-900 text-primary-200"
+                    : "text-secondary-400 hover:text-secondary-100 hover:bg-secondary-700"
+                }`}
+              >
+                <Table className="w-4 h-4" />
+                <span>Comparison</span>
               </Link>
 
               <a
