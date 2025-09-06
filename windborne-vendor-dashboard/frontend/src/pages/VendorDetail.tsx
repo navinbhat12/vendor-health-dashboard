@@ -44,7 +44,7 @@ export default function VendorDetail() {
     return (
       <div className="text-center py-12">
         <div className="card p-8 max-w-md mx-auto">
-          <p className="text-danger-600 mb-4">{error || "Vendor not found"}</p>
+          <p className="text-danger-400 mb-4">{error || "Vendor not found"}</p>
           <div className="space-y-3">
             <button onClick={loadVendorData} className="btn btn-primary w-full">
               Try Again
@@ -69,15 +69,15 @@ export default function VendorDetail() {
           </Link>
 
           <div>
-            <h1 className="text-3xl font-bold text-secondary-900">
+            <h1 className="text-3xl font-bold text-secondary-100">
               {summary.name}
             </h1>
             <div className="flex items-center space-x-2 mt-1">
-              <span className="text-lg font-medium text-primary-600">
+              <span className="text-lg font-medium text-primary-400">
                 {summary.ticker}
               </span>
               {summary.sector && (
-                <span className="text-secondary-500">• {summary.sector}</span>
+                <span className="text-secondary-400">• {summary.sector}</span>
               )}
             </div>
           </div>
@@ -91,17 +91,17 @@ export default function VendorDetail() {
 
       {/* Coming Soon Notice */}
       <div className="card p-8 text-center">
-        <h2 className="text-xl font-semibold text-secondary-900 mb-4">
+        <h2 className="text-xl font-semibold text-secondary-100 mb-4">
           Detailed Analysis Coming Soon
         </h2>
-        <p className="text-secondary-600 mb-6">
+        <p className="text-secondary-300 mb-6">
           This page will feature comprehensive financial analysis including:
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
           <div className="space-y-2">
-            <h3 className="font-medium text-secondary-700">Financial Charts</h3>
-            <ul className="text-sm text-secondary-600 space-y-1">
+            <h3 className="font-medium text-secondary-300">Financial Charts</h3>
+            <ul className="text-sm text-secondary-400 space-y-1">
               <li>• Revenue & Income Trends</li>
               <li>• Cash Flow Analysis</li>
               <li>• Ratio Comparisons</li>
@@ -109,8 +109,8 @@ export default function VendorDetail() {
           </div>
 
           <div className="space-y-2">
-            <h3 className="font-medium text-secondary-700">Detailed Metrics</h3>
-            <ul className="text-sm text-secondary-600 space-y-1">
+            <h3 className="font-medium text-secondary-300">Detailed Metrics</h3>
+            <ul className="text-sm text-secondary-400 space-y-1">
               <li>• 5-Year Historical Data</li>
               <li>• Quarterly Breakdowns</li>
               <li>• Peer Comparisons</li>
@@ -118,8 +118,8 @@ export default function VendorDetail() {
           </div>
 
           <div className="space-y-2">
-            <h3 className="font-medium text-secondary-700">Risk Analysis</h3>
-            <ul className="text-sm text-secondary-600 space-y-1">
+            <h3 className="font-medium text-secondary-300">Risk Analysis</h3>
+            <ul className="text-sm text-secondary-400 space-y-1">
               <li>• Liquidity Assessment</li>
               <li>• Leverage Analysis</li>
               <li>• Profitability Trends</li>
@@ -134,14 +134,14 @@ export default function VendorDetail() {
 
       {/* Current Summary Data */}
       <div className="card p-6">
-        <h2 className="text-lg font-semibold text-secondary-900 mb-4">
+        <h2 className="text-lg font-semibold text-secondary-100 mb-4">
           Current Summary
         </h2>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <p className="text-sm text-secondary-500">Total Revenue</p>
-            <p className="text-lg font-semibold text-secondary-900">
+            <p className="text-sm text-secondary-400">Total Revenue</p>
+            <p className="text-lg font-semibold text-secondary-100">
               {summary.total_revenue
                 ? `$${(summary.total_revenue / 1e9).toFixed(1)}B`
                 : "N/A"}
@@ -149,8 +149,8 @@ export default function VendorDetail() {
           </div>
 
           <div>
-            <p className="text-sm text-secondary-500">Net Income</p>
-            <p className="text-lg font-semibold text-secondary-900">
+            <p className="text-sm text-secondary-400">Net Income</p>
+            <p className="text-lg font-semibold text-secondary-100">
               {summary.net_income
                 ? `$${(summary.net_income / 1e9).toFixed(1)}B`
                 : "N/A"}
@@ -158,15 +158,15 @@ export default function VendorDetail() {
           </div>
 
           <div>
-            <p className="text-sm text-secondary-500">Current Ratio</p>
-            <p className="text-lg font-semibold text-secondary-900">
+            <p className="text-sm text-secondary-400">Current Ratio</p>
+            <p className="text-lg font-semibold text-secondary-100">
               {summary.current_ratio?.toFixed(2) || "N/A"}
             </p>
           </div>
 
           <div>
-            <p className="text-sm text-secondary-500">Net Margin</p>
-            <p className="text-lg font-semibold text-secondary-900">
+            <p className="text-sm text-secondary-400">Net Margin</p>
+            <p className="text-lg font-semibold text-secondary-100">
               {summary.net_margin ? `${summary.net_margin.toFixed(1)}%` : "N/A"}
             </p>
           </div>

@@ -10,9 +10,9 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-secondary-50">
+    <div className="min-h-screen bg-secondary-900">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-secondary-200">
+      <header className="bg-secondary-800 shadow-sm border-b border-secondary-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo and Title */}
@@ -21,10 +21,10 @@ export default function Layout({ children }: LayoutProps) {
                 <Building2 className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-secondary-900">
+                <h1 className="text-xl font-semibold text-secondary-100">
                   WindBorne Systems
                 </h1>
-                <p className="text-sm text-secondary-600">
+                <p className="text-sm text-secondary-400">
                   Vendor Health Dashboard
                 </p>
               </div>
@@ -36,8 +36,8 @@ export default function Layout({ children }: LayoutProps) {
                 to="/"
                 className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   location.pathname === "/"
-                    ? "bg-primary-100 text-primary-700"
-                    : "text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100"
+                    ? "bg-primary-900 text-primary-200"
+                    : "text-secondary-400 hover:text-secondary-100 hover:bg-secondary-700"
                 }`}
               >
                 <BarChart3 className="w-4 h-4" />
@@ -48,7 +48,7 @@ export default function Layout({ children }: LayoutProps) {
                 href="/api/v1/docs"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100 transition-colors"
+                className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-secondary-400 hover:text-secondary-100 hover:bg-secondary-700 transition-colors"
               >
                 <TrendingUp className="w-4 h-4" />
                 <span>API Docs</span>
@@ -64,10 +64,10 @@ export default function Layout({ children }: LayoutProps) {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-secondary-200 mt-16">
+      <footer className="bg-secondary-800 border-t border-secondary-700 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
-            <div className="text-sm text-secondary-600">
+            <div className="text-sm text-secondary-400">
               © 2024 WindBorne Systems Vendor Health Dashboard
             </div>
             <div className="text-sm text-secondary-500">

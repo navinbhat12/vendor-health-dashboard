@@ -6,7 +6,11 @@ from app.config import settings
 # Create SQLAlchemy engine
 engine = create_engine(
     settings.database_url,
-    connect_args={"check_same_thread": False} if "sqlite" in settings.database_url else {}
+    connect_args={"check_same_thread": False} if "sqlite" in settings.database_url else {},
+    pool_size=10,
+    max_overflow=20,
+    pool_pre_ping=True,
+    pool_recycle=300
 )
 
 # Create SessionLocal class

@@ -80,20 +80,29 @@ async def refresh_vendor_balance_sheet(
     # Check if vendor exists, create if not
     vendor = db.query(Vendor).filter(Vendor.ticker == ticker).first()
     if not vendor:
-        # Try to find vendor in target list
+        # Try to find vendor in target list first
         target_vendor = next((v for v in TARGET_VENDORS if v["ticker"] == ticker), None)
-        if not target_vendor:
-            raise HTTPException(status_code=404, detail="Vendor not found in target list")
         
-        # Create vendor
-        vendor_create = VendorCreate(**target_vendor)
-        vendor = Vendor(**vendor_create.dict())
+        if target_vendor:
+            # Use predefined vendor info
+            vendor_create = VendorCreate(**target_vendor)
+            vendor = Vendor(**vendor_create.dict())
+        else:
+            # For dynamic vendors, create with minimal info (will be populated from API data)
+            vendor_create = VendorCreate(
+                ticker=ticker,
+                name=f"{ticker} Corporation",  # Placeholder name
+                sector="Unknown",  # Will be updated when we get company overview
+                industry="Unknown"
+            )
+            vendor = Vendor(**vendor_create.dict())
+        
         db.add(vendor)
         db.commit()
         db.refresh(vendor)
     
     # Add background task to fetch data
-    background_tasks.add_task(fetch_financial_data, ticker, db, av_service)
+    background_tasks.add_task(fetch_financial_data, ticker, av_service)
     
     return {"message": f"Balance sheet data refresh initiated for {ticker}"}
 
@@ -128,9 +137,8 @@ async def get_vendor_balance_sheet_metrics(ticker: str, db: Session = Depends(ge
     return metrics
 
 
-@router.get("/vendors/{ticker}/summary", response_model=VendorSummary)
-async def get_vendor_summary(ticker: str, db: Session = Depends(get_database)):
-    """Get vendor summary for dashboard card"""
+def _get_vendor_summary_data(ticker: str, db: Session) -> VendorSummary:
+    """Helper function to get vendor summary data using an existing database session"""
     ticker = ticker.upper()
     
     vendor = db.query(Vendor).filter(Vendor.ticker == ticker).first()
@@ -204,6 +212,12 @@ async def get_vendor_summary(ticker: str, db: Session = Depends(get_database)):
     return summary
 
 
+@router.get("/vendors/{ticker}/summary", response_model=VendorSummary)
+async def get_vendor_summary(ticker: str, db: Session = Depends(get_database)):
+    """Get vendor summary for dashboard card"""
+    return _get_vendor_summary_data(ticker, db)
+
+
 @router.get("/comparison", response_model=VendorComparison)
 async def get_vendor_comparison(db: Session = Depends(get_database)):
     """Get comparison data for all vendors"""
@@ -211,7 +225,7 @@ async def get_vendor_comparison(db: Session = Depends(get_database)):
     
     for target_vendor in TARGET_VENDORS:
         try:
-            summary = await get_vendor_summary(target_vendor["ticker"], db)
+            summary = _get_vendor_summary_data(target_vendor["ticker"], db)
             summaries.append(summary)
         except HTTPException:
             # If vendor data not available, create empty summary
@@ -252,8 +266,7 @@ async def initialize_target_vendors(
         # Add background task to fetch balance sheet and income statement data
         background_tasks.add_task(
             fetch_financial_data, 
-            target_vendor["ticker"], 
-            db, 
+            target_vendor["ticker"],
             av_service
         )
     
@@ -265,12 +278,29 @@ async def initialize_target_vendors(
 
 async def fetch_financial_data(
     ticker: str,
-    db: Session,
     av_service: AlphaVantageService
 ):
     """Background task to fetch balance sheet and income statement data for a vendor"""
+    from app.database import SessionLocal
+    
+    # Create a new database session for this background task
+    db = SessionLocal()
+    
     try:
         logger.info(f"Fetching financial data for {ticker}")
+        
+        # For dynamic vendors, try to get company overview to update name and sector
+        vendor = db.query(Vendor).filter(Vendor.ticker == ticker).first()
+        if vendor and (vendor.name == f"{ticker} Corporation" or vendor.sector == "Unknown"):
+            logger.info(f"Fetching company overview for dynamic vendor {ticker}")
+            overview_data = await av_service.get_company_overview(ticker)
+            if overview_data:
+                # Update vendor with real company info
+                vendor.name = overview_data.get("Name", vendor.name)
+                vendor.sector = overview_data.get("Sector", vendor.sector)
+                vendor.industry = overview_data.get("Industry", vendor.industry)
+                db.commit()
+                logger.info(f"Updated company info for {ticker}: {vendor.name}")
         
         # Fetch balance sheet data from Alpha Vantage
         balance_sheet_data = await av_service.get_balance_sheet(ticker)
@@ -454,3 +484,6 @@ async def fetch_financial_data(
     except Exception as e:
         logger.error(f"Error fetching balance sheet data for {ticker}: {e}")
         db.rollback()
+    finally:
+        # Always close the database session
+        db.close()

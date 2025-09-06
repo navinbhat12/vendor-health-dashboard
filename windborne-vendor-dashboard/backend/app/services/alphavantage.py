@@ -214,6 +214,36 @@ class AlphaVantageService:
         except (ValueError, TypeError):
             return None
     
+    async def get_company_overview(self, symbol: str) -> Optional[Dict[str, Any]]:
+        """Fetch company overview data for a symbol"""
+        try:
+            await self._rate_limit_delay()
+            
+            params = {
+                "function": "OVERVIEW",
+                "symbol": symbol,
+                "apikey": self.api_key
+            }
+            
+            response = await self.client.get(self.base_url, params=params)
+            response.raise_for_status()
+            data = response.json()
+            
+            # Check for API errors
+            if "Error Message" in data:
+                logger.error(f"Alpha Vantage API error for {symbol}: {data['Error Message']}")
+                return None
+            
+            if "Information" in data:
+                logger.warning(f"Alpha Vantage API info for {symbol}: {data['Information']}")
+                return None
+            
+            return data
+            
+        except Exception as e:
+            logger.error(f"Error fetching company overview for {symbol}: {e}")
+            return None
+
     async def close(self):
         """Close the HTTP client"""
         await self.client.aclose()

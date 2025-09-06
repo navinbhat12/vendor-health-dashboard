@@ -43,19 +43,19 @@ export default function VendorCard({
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
-          <div className="flex items-center justify-center w-10 h-10 bg-primary-100 rounded-lg">
-            <Building className="w-5 h-5 text-primary-600" />
+          <div className="flex items-center justify-center w-10 h-10 bg-primary-900 rounded-lg">
+            <Building className="w-5 h-5 text-primary-400" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-secondary-900">
+            <h3 className="text-lg font-semibold text-secondary-100">
               {vendor.name}
             </h3>
             <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-primary-600">
+              <span className="text-sm font-medium text-primary-400">
                 {vendor.ticker}
               </span>
               {vendor.sector && (
-                <span className="text-sm text-secondary-500">
+                <span className="text-sm text-secondary-400">
                   • {vendor.sector}
                 </span>
               )}
@@ -104,14 +104,14 @@ export default function VendorCard({
       </div>
 
       {/* Key Ratios */}
-      <div className="border-t border-secondary-200 pt-4 mb-4">
-        <h4 className="text-sm font-medium text-secondary-700 mb-3">
+      <div className="border-t border-secondary-700 pt-4 mb-4">
+        <h4 className="text-sm font-medium text-secondary-300 mb-3">
           Key Ratios
         </h4>
 
         <div className="grid grid-cols-3 gap-3">
           <div className="text-center">
-            <p className="text-xs text-secondary-500 mb-1">Current Ratio</p>
+            <p className="text-xs text-secondary-400 mb-1">Current Ratio</p>
             <p
               className={`text-sm font-semibold ${getStatusColor(
                 currentRatioStatus
@@ -127,7 +127,7 @@ export default function VendorCard({
           </div>
 
           <div className="text-center">
-            <p className="text-xs text-secondary-500 mb-1">Debt/Equity</p>
+            <p className="text-xs text-secondary-400 mb-1">Debt/Equity</p>
             <p
               className={`text-sm font-semibold ${getStatusColor(
                 debtToEquityStatus
@@ -143,7 +143,7 @@ export default function VendorCard({
           </div>
 
           <div className="text-center">
-            <p className="text-xs text-secondary-500 mb-1">Quick Ratio</p>
+            <p className="text-xs text-secondary-400 mb-1">Quick Ratio</p>
             <p
               className={`text-sm font-semibold ${getStatusColor(
                 quickRatioStatus
@@ -156,36 +156,36 @@ export default function VendorCard({
       </div>
 
       {/* Profitability Metrics */}
-      <div className="border-t border-secondary-200 pt-4 mb-4">
-        <h4 className="text-sm font-medium text-secondary-700 mb-3">
+      <div className="border-t border-secondary-700 pt-4 mb-4">
+        <h4 className="text-sm font-medium text-secondary-300 mb-3">
           Profitability & Growth
         </h4>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="text-center">
-            <p className="text-xs text-secondary-500 mb-1">Net Margin</p>
-            <p className="text-sm font-semibold text-secondary-900">
+            <p className="text-xs text-secondary-400 mb-1">Net Margin</p>
+            <p className="text-sm font-semibold text-secondary-100">
               {formatPercentageValue(vendor.net_margin)}
             </p>
           </div>
 
           <div className="text-center">
-            <p className="text-xs text-secondary-500 mb-1">Operating Margin</p>
-            <p className="text-sm font-semibold text-secondary-900">
+            <p className="text-xs text-secondary-400 mb-1">Operating Margin</p>
+            <p className="text-sm font-semibold text-secondary-100">
               {formatPercentageValue(vendor.operating_margin)}
             </p>
           </div>
 
           <div className="text-center">
-            <p className="text-xs text-secondary-500 mb-1">Return on Equity</p>
-            <p className="text-sm font-semibold text-secondary-900">
+            <p className="text-xs text-secondary-400 mb-1">Return on Equity</p>
+            <p className="text-sm font-semibold text-secondary-100">
               {formatPercentageValue(vendor.return_on_equity)}
             </p>
           </div>
 
           <div className="text-center">
-            <p className="text-xs text-secondary-500 mb-1">Revenue CAGR (3Y)</p>
-            <p className="text-sm font-semibold text-secondary-900">
+            <p className="text-xs text-secondary-400 mb-1">Revenue CAGR (3Y)</p>
+            <p className="text-sm font-semibold text-secondary-100">
               {formatPercentageValue(vendor.revenue_cagr_3y)}
             </p>
           </div>
@@ -193,15 +193,15 @@ export default function VendorCard({
       </div>
 
       {/* Cash Quality Metrics */}
-      <div className="border-t border-secondary-200 pt-4 mb-4">
-        <h4 className="text-sm font-medium text-secondary-700 mb-3">
+      <div className="border-t border-secondary-700 pt-4 mb-4">
+        <h4 className="text-sm font-medium text-secondary-300 mb-3">
           Cash Quality
         </h4>
 
         <div className="grid grid-cols-1 gap-3">
           <div className="text-center">
-            <p className="text-xs text-secondary-500 mb-1">OCF-to-Net Income</p>
-            <p className="text-sm font-semibold text-secondary-900">
+            <p className="text-xs text-secondary-400 mb-1">OCF-to-Net Income</p>
+            <p className="text-sm font-semibold text-secondary-100">
               {formatPercentageValue(vendor.ocf_to_net_income)}
             </p>
             {vendor.ocf_to_net_income && vendor.ocf_to_net_income > 100 && (
@@ -217,23 +217,23 @@ export default function VendorCard({
       {/* Additional Metrics */}
       <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
         <div>
-          <p className="text-xs text-secondary-500 mb-1">Debt Ratio</p>
-          <p className="font-medium text-secondary-900">
+          <p className="text-xs text-secondary-400 mb-1">Debt Ratio</p>
+          <p className="font-medium text-secondary-100">
             {formatRatio(vendor.debt_ratio)}
           </p>
         </div>
 
         <div>
-          <p className="text-xs text-secondary-500 mb-1">Current Liabilities</p>
-          <p className="font-medium text-secondary-900">
+          <p className="text-xs text-secondary-400 mb-1">Current Liabilities</p>
+          <p className="font-medium text-secondary-100">
             {formatCurrency(vendor.total_current_liabilities, true)}
           </p>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-4 border-t border-secondary-200">
-        <div className="text-xs text-secondary-500">
+      <div className="flex items-center justify-between pt-4 border-t border-secondary-700">
+        <div className="text-xs text-secondary-400">
           Updated: {formatDateTime(vendor.last_updated)}
         </div>
 

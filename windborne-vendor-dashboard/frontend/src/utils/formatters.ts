@@ -137,13 +137,13 @@ export const getStatusColor = (
 ): string => {
   switch (status) {
     case "good":
-      return "text-success-600";
+      return "text-success-400";
     case "warning":
-      return "text-warning-600";
+      return "text-warning-400";
     case "danger":
-      return "text-danger-600";
+      return "text-danger-400";
     default:
-      return "text-secondary-500";
+      return "text-secondary-400";
   }
 };
 
@@ -158,6 +158,6 @@ export const getStatusBadgeClass = (
     case "danger":
       return "flag-danger";
     default:
-      return "flag-badge bg-secondary-100 text-secondary-800";
+      return "flag-badge bg-secondary-800 text-secondary-300";
   }
 };
