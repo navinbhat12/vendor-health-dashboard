@@ -142,9 +142,7 @@ const VendorComparison: React.FC = () => {
       vendor.total_revenue ? (vendor.total_revenue / 1e9).toFixed(1) : "N/A",
       vendor.net_income ? (vendor.net_income / 1e9).toFixed(1) : "N/A",
       vendor.total_assets ? (vendor.total_assets / 1e9).toFixed(1) : "N/A",
-      vendor.market_cap
-        ? (vendor.market_cap / 1e9).toFixed(1)
-        : "N/A",
+      vendor.market_cap ? (vendor.market_cap / 1e9).toFixed(1) : "N/A",
       vendor.current_ratio ? vendor.current_ratio.toFixed(2) : "N/A",
       vendor.quick_ratio ? vendor.quick_ratio.toFixed(2) : "N/A",
       vendor.debt_to_equity ? vendor.debt_to_equity.toFixed(2) : "N/A",

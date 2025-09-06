@@ -116,6 +116,9 @@ export interface VendorSummary {
   // Cash Quality metrics
   ocf_to_net_income?: number;
 
+  // Market Data
+  market_cap?: number;
+
   // Flags
   liquidity_flag: boolean;
   leverage_flag: boolean;
