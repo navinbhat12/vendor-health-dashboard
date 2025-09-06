@@ -28,7 +28,7 @@ router = APIRouter()
 _comparison_cache = {
     "data": None,
     "timestamp": None,
-    "ttl_hours": 24  # Cache for 24 hours
+    "ttl_hours": 168  # Cache for 1 week (7 days * 24 hours)
 }
 
 # Target vendors for WindBorne Systems
@@ -268,7 +268,7 @@ async def get_vendor_summary(ticker: str, db: Session = Depends(get_database)):
 
 @router.get("/comparison", response_model=VendorComparison)
 async def get_vendor_comparison(db: Session = Depends(get_database)):
-    """Get comparison data for all vendors with 24-hour caching"""
+    """Get comparison data for all vendors with 1-week caching"""
     
     # Check cache first
     cached_result = _get_cached_comparison()

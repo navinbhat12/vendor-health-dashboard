@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     database_url: str = Field(
         default="sqlite:///./vendor_data.db",
         env="DATABASE_URL",
-        description="Database URL. Use postgresql://user:pass@host:port/db for PostgreSQL"
+        description="SQLite database URL"
     )
     
     # Application Configuration
@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     
     # Rate Limiting Configuration
     requests_per_minute: int = Field(default=5, env="REQUESTS_PER_MINUTE")
-    cache_expiry_hours: int = Field(default=24, env="CACHE_EXPIRY_HOURS")
+    cache_expiry_hours: int = Field(default=168, env="CACHE_EXPIRY_HOURS")  # 1 week (7 days * 24 hours)
     
     # CORS Configuration
     allowed_origins: List[str] = Field(
