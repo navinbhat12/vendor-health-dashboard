@@ -63,6 +63,33 @@ class BalanceSheetData(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 
+class IncomeStatementData(Base):
+    __tablename__ = "income_statement_data"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    ticker = Column(String(10), index=True, nullable=False)
+    fiscal_date_ending = Column(String(10), nullable=False)  # YYYY-MM-DD format
+    
+    # Income Statement Data (key fields from Alpha Vantage)
+    reported_currency = Column(String(5), default="USD")
+    total_revenue = Column(Float)
+    gross_profit = Column(Float)
+    operating_income = Column(Float)
+    net_income = Column(Float)
+    ebitda = Column(Float)
+    
+    # Additional fields
+    cost_of_revenue = Column(Float)
+    operating_expenses = Column(Float)
+    income_before_tax = Column(Float)
+    income_tax_expense = Column(Float)
+    
+    # Metadata
+    raw_data = Column(Text)  # Store original JSON response
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
 class BalanceSheetMetrics(Base):
     __tablename__ = "balance_sheet_metrics"
     
@@ -84,6 +111,51 @@ class BalanceSheetMetrics(Base):
     # Risk Flags (based on Balance Sheet ratios)
     liquidity_flag = Column(Boolean, default=False)  # Current Ratio < 1.2
     leverage_flag = Column(Boolean, default=False)   # Debt-to-Equity > 2.0
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class CashFlowData(Base):
+    __tablename__ = "cash_flow_data"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    ticker = Column(String(10), index=True, nullable=False)
+    fiscal_date_ending = Column(String(10), nullable=False)  # YYYY-MM-DD format
+    
+    # Cash Flow Data (key fields from Alpha Vantage)
+    reported_currency = Column(String(5), default="USD")
+    operating_cashflow = Column(Float)
+    net_income = Column(Float)  # Also in cash flow statement
+    capital_expenditures = Column(Float)
+    cashflow_from_investment = Column(Float)
+    cashflow_from_financing = Column(Float)
+    dividend_payout = Column(Float)
+    depreciation_depletion_amortization = Column(Float)
+    
+    # Metadata
+    raw_data = Column(Text)  # Store original JSON response
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class ProfitabilityMetrics(Base):
+    __tablename__ = "profitability_metrics"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    ticker = Column(String(10), index=True, nullable=False)
+    fiscal_date_ending = Column(String(10), nullable=False)
+    
+    # Profitability Ratios (%)
+    net_margin = Column(Float)       # Net Income / Total Revenue * 100
+    operating_margin = Column(Float) # Operating Income / Total Revenue * 100
+    return_on_equity = Column(Float) # Net Income / Shareholders' Equity * 100
+    
+    # Growth Metrics (%)
+    revenue_cagr_3y = Column(Float)  # 3-year Revenue CAGR
+    
+    # Cash Quality Metrics (%)
+    ocf_to_net_income = Column(Float)  # Operating Cash Flow / Net Income * 100
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

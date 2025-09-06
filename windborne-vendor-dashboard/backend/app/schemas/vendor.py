@@ -145,8 +145,107 @@ class BalanceSheetMetrics(BalanceSheetMetricsBase):
         from_attributes = True
 
 
+class IncomeStatementDataBase(BaseModel):
+    ticker: str
+    fiscal_date_ending: str
+    reported_currency: str = "USD"
+
+
+class IncomeStatementDataCreate(IncomeStatementDataBase):
+    # Income Statement Data  
+    total_revenue: Optional[float] = None
+    gross_profit: Optional[float] = None
+    operating_income: Optional[float] = None
+    net_income: Optional[float] = None
+    ebitda: Optional[float] = None
+    cost_of_revenue: Optional[float] = None
+    operating_expenses: Optional[float] = None
+    income_before_tax: Optional[float] = None
+    income_tax_expense: Optional[float] = None
+    raw_data: Optional[str] = None
+
+
+class IncomeStatementData(IncomeStatementDataBase):
+    id: int
+    total_revenue: Optional[float] = None
+    gross_profit: Optional[float] = None
+    operating_income: Optional[float] = None
+    net_income: Optional[float] = None
+    ebitda: Optional[float] = None
+    cost_of_revenue: Optional[float] = None
+    operating_expenses: Optional[float] = None
+    income_before_tax: Optional[float] = None
+    income_tax_expense: Optional[float] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True
+
+
+class ProfitabilityMetricsBase(BaseModel):
+    ticker: str
+    fiscal_date_ending: str
+
+
+class CashFlowDataBase(BaseModel):
+    ticker: str
+    fiscal_date_ending: str
+    reported_currency: str = "USD"
+
+
+class CashFlowDataCreate(CashFlowDataBase):
+    # Cash Flow Data  
+    operating_cashflow: Optional[float] = None
+    net_income: Optional[float] = None
+    capital_expenditures: Optional[float] = None
+    cashflow_from_investment: Optional[float] = None
+    cashflow_from_financing: Optional[float] = None
+    dividend_payout: Optional[float] = None
+    depreciation_depletion_amortization: Optional[float] = None
+    raw_data: Optional[str] = None
+
+
+class CashFlowData(CashFlowDataBase):
+    id: int
+    operating_cashflow: Optional[float] = None
+    net_income: Optional[float] = None
+    capital_expenditures: Optional[float] = None
+    cashflow_from_investment: Optional[float] = None
+    cashflow_from_financing: Optional[float] = None
+    dividend_payout: Optional[float] = None
+    depreciation_depletion_amortization: Optional[float] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True
+
+
+class ProfitabilityMetricsCreate(ProfitabilityMetricsBase):
+    net_margin: Optional[float] = None
+    operating_margin: Optional[float] = None
+    return_on_equity: Optional[float] = None
+    revenue_cagr_3y: Optional[float] = None
+    ocf_to_net_income: Optional[float] = None
+
+
+class ProfitabilityMetrics(ProfitabilityMetricsBase):
+    id: int
+    net_margin: Optional[float] = None
+    operating_margin: Optional[float] = None
+    return_on_equity: Optional[float] = None
+    revenue_cagr_3y: Optional[float] = None
+    ocf_to_net_income: Optional[float] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True
+
+
 class VendorSummary(BaseModel):
-    """Summary card data for a vendor (Balance Sheet focus)"""
+    """Summary card data for a vendor (Balance Sheet + Income Statement focus)"""
     ticker: str
     name: str
     sector: Optional[str] = None
@@ -158,16 +257,30 @@ class VendorSummary(BaseModel):
     total_shareholder_equity: Optional[float] = None
     cash_and_cash_equivalents: Optional[float] = None
     
-    # Key metrics (from Balance Sheet only)
+    # Income Statement highlights
+    total_revenue: Optional[float] = None
+    net_income: Optional[float] = None
+    operating_income: Optional[float] = None
+    
+    # Balance Sheet metrics
     current_ratio: Optional[float] = None
     debt_to_equity: Optional[float] = None
     quick_ratio: Optional[float] = None
     debt_ratio: Optional[float] = None
     
+    # Profitability metrics
+    net_margin: Optional[float] = None
+    operating_margin: Optional[float] = None
+    return_on_equity: Optional[float] = None
+    revenue_cagr_3y: Optional[float] = None
+
+    # Cash Quality metrics
+    ocf_to_net_income: Optional[float] = None
+
     # Flags
     liquidity_flag: bool = False
     leverage_flag: bool = False
-    
+
     last_updated: Optional[datetime] = None
 
 

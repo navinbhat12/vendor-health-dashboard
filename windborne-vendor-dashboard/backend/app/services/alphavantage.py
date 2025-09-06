@@ -71,6 +71,14 @@ class AlphaVantageService:
         """Get balance sheet data for a symbol"""
         return await self._make_request("BALANCE_SHEET", symbol)
     
+    async def get_income_statement(self, symbol: str) -> Optional[Dict[str, Any]]:
+        """Get income statement data for a symbol"""
+        return await self._make_request("INCOME_STATEMENT", symbol)
+    
+    async def get_cash_flow(self, symbol: str) -> Optional[Dict[str, Any]]:
+        """Get cash flow data for a symbol"""
+        return await self._make_request("CASH_FLOW", symbol)
+    
     def parse_balance_sheet(self, data: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Parse balance sheet data into standardized format matching Alpha Vantage fields"""
         if not data or "annualReports" not in data:
@@ -128,6 +136,73 @@ class AlphaVantageService:
         
         return parsed_reports
     
+    def parse_income_statement(self, data: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Parse income statement data into standardized format"""
+        if not data or "annualReports" not in data:
+            return []
+        
+        parsed_reports = []
+        # Use the most recent 3 years for trend analysis
+        for report in data["annualReports"][:3]:
+            try:
+                parsed_report = {
+                    "ticker": data.get("symbol"),
+                    "fiscal_date_ending": report.get("fiscalDateEnding"),
+                    "reported_currency": report.get("reportedCurrency", "USD"),
+                    
+                    # Revenue and Profitability
+                    "total_revenue": self._safe_float(report.get("totalRevenue")),
+                    "gross_profit": self._safe_float(report.get("grossProfit")),
+                    "operating_income": self._safe_float(report.get("operatingIncome")),
+                    "net_income": self._safe_float(report.get("netIncome")),
+                    "ebitda": self._safe_float(report.get("ebitda")),
+                    
+                    # Additional useful fields
+                    "cost_of_revenue": self._safe_float(report.get("costOfRevenue")),
+                    "operating_expenses": self._safe_float(report.get("operatingExpenses")),
+                    "income_before_tax": self._safe_float(report.get("incomeBeforeTax")),
+                    "income_tax_expense": self._safe_float(report.get("incomeTaxExpense")),
+                    
+                    "raw_data": json.dumps(report)
+                }
+                parsed_reports.append(parsed_report)
+            except Exception as e:
+                logger.error(f"Error parsing income statement report: {e}")
+                continue
+        
+        return parsed_reports
+    
+    def parse_cash_flow(self, data: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Parse cash flow data into standardized format"""
+        if not data or "annualReports" not in data:
+            return []
+        
+        parsed_reports = []
+        # Use the most recent 3 years for trend analysis
+        for report in data["annualReports"][:3]:
+            try:
+                parsed_report = {
+                    "ticker": data.get("symbol"),
+                    "fiscal_date_ending": report.get("fiscalDateEnding"),
+                    "reported_currency": report.get("reportedCurrency", "USD"),
+                    
+                    # Key cash flow metrics
+                    "operating_cashflow": self._safe_float(report.get("operatingCashflow")),
+                    "net_income": self._safe_float(report.get("netIncome")),
+                    "capital_expenditures": self._safe_float(report.get("capitalExpenditures")),
+                    "cashflow_from_investment": self._safe_float(report.get("cashflowFromInvestment")),
+                    "cashflow_from_financing": self._safe_float(report.get("cashflowFromFinancing")),
+                    "dividend_payout": self._safe_float(report.get("dividendPayout")),
+                    "depreciation_depletion_amortization": self._safe_float(report.get("depreciationDepletionAndAmortization")),
+                    
+                    "raw_data": json.dumps(report)
+                }
+                parsed_reports.append(parsed_report)
+            except Exception as e:
+                logger.error(f"Error parsing cash flow report: {e}")
+                continue
+        
+        return parsed_reports
     
     def _safe_float(self, value: Any) -> Optional[float]:
         """Safely convert a value to float, handling None strings and invalid values"""

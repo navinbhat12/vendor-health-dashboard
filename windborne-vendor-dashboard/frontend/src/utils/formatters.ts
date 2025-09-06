@@ -51,6 +51,20 @@ export const formatPercentage = (
   }).format(value);
 };
 
+export const formatPercentageValue = (
+  value: number | null | undefined,
+  decimals = 1
+): string => {
+  if (value === null || value === undefined) return "N/A";
+
+  return (
+    new Intl.NumberFormat("en-US", {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    }).format(value) + "%"
+  );
+};
+
 export const formatRatio = (
   value: number | null | undefined,
   decimals = 2

@@ -5,10 +5,10 @@ import {
   formatCurrency,
   formatRatio,
   formatPercentage,
+  formatPercentageValue,
   formatDateTime,
   getMetricStatus,
   getStatusColor,
-  getStatusBadgeClass,
 } from "../utils/formatters";
 
 interface VendorCardProps {
@@ -72,8 +72,22 @@ export default function VendorCard({
         )}
       </div>
 
-      {/* Key Balance Sheet Metrics */}
+      {/* Financial Highlights */}
       <div className="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <p className="metric-label">Total Revenue</p>
+          <p className="metric-value text-lg">
+            {formatCurrency(vendor.total_revenue, true)}
+          </p>
+        </div>
+
+        <div>
+          <p className="metric-label">Net Income</p>
+          <p className="metric-value text-lg">
+            {formatCurrency(vendor.net_income, true)}
+          </p>
+        </div>
+
         <div>
           <p className="metric-label">Total Assets</p>
           <p className="metric-value text-lg">
@@ -85,20 +99,6 @@ export default function VendorCard({
           <p className="metric-label">Total Equity</p>
           <p className="metric-value text-lg">
             {formatCurrency(vendor.total_shareholder_equity, true)}
-          </p>
-        </div>
-
-        <div>
-          <p className="metric-label">Current Assets</p>
-          <p className="metric-value text-lg">
-            {formatCurrency(vendor.total_current_assets, true)}
-          </p>
-        </div>
-
-        <div>
-          <p className="metric-label">Cash & Equivalents</p>
-          <p className="metric-value text-lg">
-            {formatCurrency(vendor.cash_and_cash_equivalents, true)}
           </p>
         </div>
       </div>
@@ -155,7 +155,66 @@ export default function VendorCard({
         </div>
       </div>
 
-      {/* Additional Balance Sheet Metrics */}
+      {/* Profitability Metrics */}
+      <div className="border-t border-secondary-200 pt-4 mb-4">
+        <h4 className="text-sm font-medium text-secondary-700 mb-3">
+          Profitability & Growth
+        </h4>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="text-center">
+            <p className="text-xs text-secondary-500 mb-1">Net Margin</p>
+            <p className="text-sm font-semibold text-secondary-900">
+              {formatPercentageValue(vendor.net_margin)}
+            </p>
+          </div>
+
+          <div className="text-center">
+            <p className="text-xs text-secondary-500 mb-1">Operating Margin</p>
+            <p className="text-sm font-semibold text-secondary-900">
+              {formatPercentageValue(vendor.operating_margin)}
+            </p>
+          </div>
+
+          <div className="text-center">
+            <p className="text-xs text-secondary-500 mb-1">Return on Equity</p>
+            <p className="text-sm font-semibold text-secondary-900">
+              {formatPercentageValue(vendor.return_on_equity)}
+            </p>
+          </div>
+
+          <div className="text-center">
+            <p className="text-xs text-secondary-500 mb-1">Revenue CAGR (3Y)</p>
+            <p className="text-sm font-semibold text-secondary-900">
+              {formatPercentageValue(vendor.revenue_cagr_3y)}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Cash Quality Metrics */}
+      <div className="border-t border-secondary-200 pt-4 mb-4">
+        <h4 className="text-sm font-medium text-secondary-700 mb-3">
+          Cash Quality
+        </h4>
+
+        <div className="grid grid-cols-1 gap-3">
+          <div className="text-center">
+            <p className="text-xs text-secondary-500 mb-1">OCF-to-Net Income</p>
+            <p className="text-sm font-semibold text-secondary-900">
+              {formatPercentageValue(vendor.ocf_to_net_income)}
+            </p>
+            {vendor.ocf_to_net_income && vendor.ocf_to_net_income > 100 && (
+              <p className="text-xs text-green-600 mt-1">High Quality</p>
+            )}
+            {vendor.ocf_to_net_income && vendor.ocf_to_net_income < 80 && (
+              <p className="text-xs text-orange-600 mt-1">Monitor</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Additional Metrics */}
       <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
         <div>
           <p className="text-xs text-secondary-500 mb-1">Debt Ratio</p>

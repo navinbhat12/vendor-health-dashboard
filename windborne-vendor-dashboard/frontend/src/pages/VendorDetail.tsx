@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import { vendorApi } from "../services/api";
-import type { VendorSummary, VendorTrends } from "../types/vendor";
+import type { VendorSummary } from "../types/vendor";
 
 export default function VendorDetail() {
   const { ticker } = useParams<{ ticker: string }>();
   const [summary, setSummary] = useState<VendorSummary | null>(null);
-  const [trends, setTrends] = useState<VendorTrends | null>(null);
+  // const [trends, setTrends] = useState<VendorTrends | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,12 +16,8 @@ export default function VendorDetail() {
 
     try {
       setLoading(true);
-      const [summaryData, trendsData] = await Promise.all([
-        vendorApi.getVendorSummary(ticker),
-        vendorApi.getVendorTrends(ticker),
-      ]);
+      const summaryData = await vendorApi.getVendorSummary(ticker);
       setSummary(summaryData);
-      setTrends(trendsData);
       setError(null);
     } catch (err) {
       console.error("Failed to load vendor data:", err);
@@ -144,19 +140,19 @@ export default function VendorDetail() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <p className="text-sm text-secondary-500">Market Cap</p>
+            <p className="text-sm text-secondary-500">Total Revenue</p>
             <p className="text-lg font-semibold text-secondary-900">
-              {summary.market_cap
-                ? `$${(summary.market_cap / 1e9).toFixed(1)}B`
+              {summary.total_revenue
+                ? `$${(summary.total_revenue / 1e9).toFixed(1)}B`
                 : "N/A"}
             </p>
           </div>
 
           <div>
-            <p className="text-sm text-secondary-500">Revenue (TTM)</p>
+            <p className="text-sm text-secondary-500">Net Income</p>
             <p className="text-lg font-semibold text-secondary-900">
-              {summary.trailing_revenue
-                ? `$${(summary.trailing_revenue / 1e9).toFixed(1)}B`
+              {summary.net_income
+                ? `$${(summary.net_income / 1e9).toFixed(1)}B`
                 : "N/A"}
             </p>
           </div>
@@ -171,9 +167,7 @@ export default function VendorDetail() {
           <div>
             <p className="text-sm text-secondary-500">Net Margin</p>
             <p className="text-lg font-semibold text-secondary-900">
-              {summary.net_margin
-                ? `${(summary.net_margin * 100).toFixed(1)}%`
-                : "N/A"}
+              {summary.net_margin ? `${summary.net_margin.toFixed(1)}%` : "N/A"}
             </p>
           </div>
         </div>

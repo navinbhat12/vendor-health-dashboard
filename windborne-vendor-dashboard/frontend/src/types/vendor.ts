@@ -96,11 +96,25 @@ export interface VendorSummary {
   total_shareholder_equity?: number;
   cash_and_cash_equivalents?: number;
 
-  // Key metrics (from Balance Sheet only)
+  // Income Statement highlights
+  total_revenue?: number;
+  net_income?: number;
+  operating_income?: number;
+
+  // Balance Sheet metrics
   current_ratio?: number;
   debt_to_equity?: number;
   quick_ratio?: number;
   debt_ratio?: number;
+
+  // Profitability metrics
+  net_margin?: number;
+  operating_margin?: number;
+  return_on_equity?: number;
+  revenue_cagr_3y?: number;
+
+  // Cash Quality metrics
+  ocf_to_net_income?: number;
 
   // Flags
   liquidity_flag: boolean;
