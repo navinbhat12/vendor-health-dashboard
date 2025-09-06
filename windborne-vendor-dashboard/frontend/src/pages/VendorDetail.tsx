@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, RefreshCw, Building, ExternalLink } from "lucide-react";
+import { ArrowLeft, RefreshCw, Building } from "lucide-react";
 import {
   LineChart,
   Line,

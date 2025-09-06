@@ -318,14 +318,24 @@ async def get_api_key_status(av_service: AlphaVantageService = Depends(get_alpha
 
 
 @router.get("/vendors/{ticker}/overview")
-async def get_vendor_overview(ticker: str, av_service: AlphaVantageService = Depends(get_alphavantage_service)):
-    """Get company overview data for a vendor"""
+async def get_vendor_overview(ticker: str, db: Session = Depends(get_database)):
+    """Get company overview data for a vendor from database"""
     ticker = ticker.upper()
     
     try:
-        overview_data = await av_service.get_company_overview(ticker)
-        if not overview_data:
-            raise HTTPException(status_code=404, detail="Company overview not found")
+        vendor = db.query(Vendor).filter(Vendor.ticker == ticker).first()
+        if not vendor:
+            raise HTTPException(status_code=404, detail="Vendor not found")
+        
+        # Return overview data from database
+        overview_data = {
+            "Symbol": vendor.ticker,
+            "Name": vendor.name,
+            "Description": vendor.description,
+            "Sector": vendor.sector,
+            "Industry": vendor.industry,
+            "MarketCapitalization": str(int(vendor.market_cap)) if vendor.market_cap else None
+        }
         
         return overview_data
     except Exception as e:

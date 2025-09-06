@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { ArrowUpDown, ArrowUp, ArrowDown, RefreshCw } from "lucide-react";
+import {
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Download,
+  RefreshCw,
+} from "lucide-react";
 import { vendorApi } from "../services/api";
 import type { VendorSummary } from "../types/vendor";
 import { formatPercentageValue, formatNumber } from "../utils/formatters";
@@ -105,6 +111,73 @@ const VendorComparison: React.FC = () => {
     }
   };
 
+  const exportToCSV = () => {
+    if (vendors.length === 0) return;
+
+    // Define headers with readable names
+    const headers = [
+      "Ticker",
+      "Company Name",
+      "Sector",
+      "Revenue ($B)",
+      "Net Income ($B)",
+      "Total Assets ($B)",
+      "Market Cap ($B)",
+      "Current Ratio",
+      "Quick Ratio",
+      "Debt-to-Equity",
+      "Debt Ratio",
+      "Net Margin (%)",
+      "Operating Margin (%)",
+      "Return on Equity (%)",
+      "Revenue CAGR 3Y (%)",
+      "OCF-to-Net Income (%)",
+    ];
+
+    // Convert vendor data to CSV rows
+    const csvData = vendors.map((vendor) => [
+      vendor.ticker,
+      vendor.name,
+      vendor.sector || "N/A",
+      vendor.total_revenue ? (vendor.total_revenue / 1e9).toFixed(1) : "N/A",
+      vendor.net_income ? (vendor.net_income / 1e9).toFixed(1) : "N/A",
+      vendor.total_assets ? (vendor.total_assets / 1e9).toFixed(1) : "N/A",
+      vendor.market_cap
+        ? (vendor.market_cap / 1e9).toFixed(1)
+        : "N/A",
+      vendor.current_ratio ? vendor.current_ratio.toFixed(2) : "N/A",
+      vendor.quick_ratio ? vendor.quick_ratio.toFixed(2) : "N/A",
+      vendor.debt_to_equity ? vendor.debt_to_equity.toFixed(2) : "N/A",
+      vendor.debt_ratio ? vendor.debt_ratio.toFixed(2) : "N/A",
+      vendor.net_margin ? vendor.net_margin.toFixed(1) : "N/A",
+      vendor.operating_margin ? vendor.operating_margin.toFixed(1) : "N/A",
+      vendor.return_on_equity ? vendor.return_on_equity.toFixed(1) : "N/A",
+      vendor.revenue_cagr_3y ? vendor.revenue_cagr_3y.toFixed(1) : "N/A",
+      vendor.ocf_to_net_income ? vendor.ocf_to_net_income.toFixed(1) : "N/A",
+    ]);
+
+    // Combine headers and data
+    const csvContent = [headers, ...csvData]
+      .map((row) => row.map((cell) => `"${cell}"`).join(","))
+      .join("\n");
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `windborne-vendor-comparison-${
+        new Date().toISOString().split("T")[0]
+      }.csv`
+    );
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const SortableHeader: React.FC<{
     field: SortableField;
     label: string;
@@ -157,14 +230,12 @@ const VendorComparison: React.FC = () => {
         </div>
 
         <button
-          onClick={loadVendorData}
-          className="btn btn-secondary"
-          disabled={loading}
+          onClick={exportToCSV}
+          className="btn btn-primary"
+          disabled={loading || vendors.length === 0}
         >
-          <RefreshCw
-            className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`}
-          />
-          Refresh Data
+          <Download className="w-4 h-4 mr-2" />
+          Export CSV
         </button>
       </div>
 

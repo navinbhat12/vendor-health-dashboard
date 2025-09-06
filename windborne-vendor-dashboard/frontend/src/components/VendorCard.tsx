@@ -4,7 +4,6 @@ import type { VendorSummary } from "../types/vendor";
 import {
   formatCurrency,
   formatRatio,
-  formatPercentage,
   formatPercentageValue,
   formatDateTime,
   getMetricStatus,
@@ -96,9 +95,9 @@ export default function VendorCard({
         </div>
 
         <div>
-          <p className="metric-label">Cash & Equivalents</p>
+          <p className="metric-label">Market Cap</p>
           <p className="metric-value text-lg">
-            {formatCurrency(vendor.cash_and_cash_equivalents, true)}
+            {formatCurrency(vendor.market_cap, true)}
           </p>
         </div>
       </div>

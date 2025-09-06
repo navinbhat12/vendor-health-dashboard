@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { RefreshCw, Download, Table } from "lucide-react";
+import { Download, Table, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import VendorCard from "../components/VendorCard";
 import AddVendorCard from "../components/AddVendorCard";
@@ -9,7 +9,6 @@ import type { VendorComparison, VendorSummary } from "../types/vendor";
 export default function Dashboard() {
   const [comparison, setComparison] = useState<VendorComparison | null>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dynamicVendors, setDynamicVendors] = useState<VendorSummary[]>([]);
   const [addingVendor, setAddingVendor] = useState(false);
@@ -30,20 +29,6 @@ export default function Dashboard() {
     }
   };
 
-  const handleRefreshVendor = async (ticker: string) => {
-    try {
-      setRefreshing(ticker);
-      await vendorApi.refreshVendorData(ticker);
-      // Reload comparison data after refresh
-      setTimeout(() => {
-        loadComparison();
-        setRefreshing(null);
-      }, 2000); // Give some time for background processing
-    } catch (err) {
-      console.error(`Failed to refresh ${ticker}:`, err);
-      setRefreshing(null);
-    }
-  };
 
   const handleInitializeVendors = async () => {
     try {
@@ -130,8 +115,75 @@ export default function Dashboard() {
     }
   };
 
-  const handleRemoveDynamicVendor = (ticker: string) => {
-    setDynamicVendors((prev) => prev.filter((v) => v.ticker !== ticker));
+
+  const exportToCSV = () => {
+    if (!comparison?.vendors || comparison.vendors.length === 0) return;
+
+    // Define headers with readable names
+    const headers = [
+      "Ticker",
+      "Company Name",
+      "Sector",
+      "Revenue ($B)",
+      "Net Income ($B)",
+      "Total Assets ($B)",
+      "Market Cap ($B)",
+      "Current Ratio",
+      "Quick Ratio",
+      "Debt-to-Equity",
+      "Debt Ratio",
+      "Net Margin (%)",
+      "Operating Margin (%)",
+      "Return on Equity (%)",
+      "Revenue CAGR 3Y (%)",
+      "OCF-to-Net Income (%)",
+    ];
+
+    // Include both main vendors and dynamic vendors
+    const allVendors = [...comparison.vendors, ...dynamicVendors];
+
+    // Convert vendor data to CSV rows
+    const csvData = allVendors.map((vendor) => [
+      vendor.ticker,
+      vendor.name,
+      vendor.sector || "N/A",
+      vendor.total_revenue ? (vendor.total_revenue / 1e9).toFixed(1) : "N/A",
+      vendor.net_income ? (vendor.net_income / 1e9).toFixed(1) : "N/A",
+      vendor.total_assets ? (vendor.total_assets / 1e9).toFixed(1) : "N/A",
+      vendor.market_cap
+        ? (vendor.market_cap / 1e9).toFixed(1)
+        : "N/A",
+      vendor.current_ratio ? vendor.current_ratio.toFixed(2) : "N/A",
+      vendor.quick_ratio ? vendor.quick_ratio.toFixed(2) : "N/A",
+      vendor.debt_to_equity ? vendor.debt_to_equity.toFixed(2) : "N/A",
+      vendor.debt_ratio ? vendor.debt_ratio.toFixed(2) : "N/A",
+      vendor.net_margin ? vendor.net_margin.toFixed(1) : "N/A",
+      vendor.operating_margin ? vendor.operating_margin.toFixed(1) : "N/A",
+      vendor.return_on_equity ? vendor.return_on_equity.toFixed(1) : "N/A",
+      vendor.revenue_cagr_3y ? vendor.revenue_cagr_3y.toFixed(1) : "N/A",
+      vendor.ocf_to_net_income ? vendor.ocf_to_net_income.toFixed(1) : "N/A",
+    ]);
+
+    // Combine headers and data
+    const csvContent = [headers, ...csvData]
+      .map((row) => row.map((cell) => `"${cell}"`).join(","))
+      .join("\n");
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `windborne-vendor-dashboard-${
+        new Date().toISOString().split("T")[0]
+      }.csv`
+    );
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   useEffect(() => {
@@ -192,21 +244,9 @@ export default function Dashboard() {
           </Link>
 
           <button
-            onClick={loadComparison}
-            className="btn btn-secondary"
-            disabled={loading}
-          >
-            <RefreshCw
-              className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`}
-            />
-            Refresh All
-          </button>
-
-          <button
-            onClick={() => {
-              /* TODO: Implement CSV export */
-            }}
-            className="btn btn-secondary"
+            onClick={exportToCSV}
+            className="btn btn-primary"
+            disabled={loading || !comparison?.vendors || comparison.vendors.length === 0}
           >
             <Download className="w-4 h-4 mr-2" />
             Export CSV
@@ -222,8 +262,6 @@ export default function Dashboard() {
             <VendorCard
               key={vendor.ticker}
               vendor={vendor}
-              onRefresh={handleRefreshVendor}
-              isRefreshing={refreshing === vendor.ticker}
             />
           ))}
 
@@ -232,8 +270,6 @@ export default function Dashboard() {
             <VendorCard
               key={`dynamic-${vendor.ticker}`}
               vendor={vendor}
-              onRefresh={handleRefreshVendor}
-              isRefreshing={refreshing === vendor.ticker}
             />
           ))}
 
@@ -272,8 +308,6 @@ export default function Dashboard() {
               <VendorCard
                 key={`dynamic-${vendor.ticker}`}
                 vendor={vendor}
-                onRefresh={handleRefreshVendor}
-                isRefreshing={refreshing === vendor.ticker}
               />
             ))}
           </div>
