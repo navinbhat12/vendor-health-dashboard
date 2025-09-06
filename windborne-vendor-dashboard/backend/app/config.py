@@ -31,7 +31,14 @@ class Settings(BaseSettings):
     
     # CORS Configuration
     allowed_origins: List[str] = Field(
-        default=["http://localhost:5175", "http://localhost:5174", "http://localhost:5173", "http://localhost:3000"],
+        default=[
+            "http://localhost:5175", 
+            "http://localhost:5174", 
+            "http://localhost:5173", 
+            "http://localhost:3000",
+            "https://windborne-swe.vercel.app",
+            "https://*.vercel.app"
+        ],
         env="ALLOWED_ORIGINS"
     )
     
