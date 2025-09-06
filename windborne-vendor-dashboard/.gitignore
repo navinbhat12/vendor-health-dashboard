@@ -30,7 +30,7 @@ MANIFEST
 *.db
 *.sqlite
 *.sqlite3
-vendor_data.db
+# vendor_data.db  # Commented out - we need this for deployment
 
 # Node.js
 node_modules/
