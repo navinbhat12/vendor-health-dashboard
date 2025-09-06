@@ -287,6 +287,8 @@ class VendorSummary(BaseModel):
 class VendorComparison(BaseModel):
     """Data for vendor comparison table"""
     vendors: List[VendorSummary]
+    cached: Optional[bool] = False
+    cache_timestamp: Optional[datetime] = None
 
 
 class TrendData(BaseModel):

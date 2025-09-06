@@ -1,4 +1,5 @@
 from typing import List, Optional
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
@@ -23,6 +24,13 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+# Simple in-memory cache for vendor comparison data
+_comparison_cache = {
+    "data": None,
+    "timestamp": None,
+    "ttl_hours": 1  # Cache for 1 hour
+}
+
 # Target vendors for WindBorne Systems
 TARGET_VENDORS = [
     {"ticker": "TEL", "name": "TE Connectivity", "sector": "Technology", "industry": "Electronic Components"},
@@ -31,6 +39,41 @@ TARGET_VENDORS = [
     {"ticker": "CE", "name": "Celanese", "sector": "Materials", "industry": "Chemicals"},
     {"ticker": "LYB", "name": "LyondellBasell", "sector": "Materials", "industry": "Chemicals"},
 ]
+
+
+def _is_cache_valid() -> bool:
+    """Check if the comparison cache is still valid"""
+    if _comparison_cache["data"] is None or _comparison_cache["timestamp"] is None:
+        return False
+    
+    cache_age = datetime.now() - _comparison_cache["timestamp"]
+    return cache_age < timedelta(hours=_comparison_cache["ttl_hours"])
+
+
+def _get_cached_comparison() -> Optional[VendorComparison]:
+    """Get cached comparison data if valid"""
+    if _is_cache_valid():
+        logger.info("Serving vendor comparison from cache")
+        cached_data = _comparison_cache["data"]
+        # Update cache metadata
+        cached_data.cached = True
+        cached_data.cache_timestamp = _comparison_cache["timestamp"]
+        return cached_data
+    return None
+
+
+def _set_comparison_cache(data: VendorComparison) -> None:
+    """Cache the comparison data"""
+    _comparison_cache["data"] = data
+    _comparison_cache["timestamp"] = datetime.now()
+    logger.info("Cached vendor comparison data")
+
+
+def _invalidate_comparison_cache() -> None:
+    """Invalidate the comparison cache"""
+    _comparison_cache["data"] = None
+    _comparison_cache["timestamp"] = None
+    logger.info("Invalidated vendor comparison cache")
 
 
 @router.get("/vendors", response_model=List[VendorSchema])
@@ -103,6 +146,9 @@ async def refresh_vendor_balance_sheet(
     
     # Add background task to fetch data
     background_tasks.add_task(fetch_financial_data, ticker, av_service)
+    
+    # Invalidate cache since we're updating data
+    _invalidate_comparison_cache()
     
     return {"message": f"Balance sheet data refresh initiated for {ticker}"}
 
@@ -220,7 +266,15 @@ async def get_vendor_summary(ticker: str, db: Session = Depends(get_database)):
 
 @router.get("/comparison", response_model=VendorComparison)
 async def get_vendor_comparison(db: Session = Depends(get_database)):
-    """Get comparison data for all vendors"""
+    """Get comparison data for all vendors with 1-hour caching"""
+    
+    # Check cache first
+    cached_result = _get_cached_comparison()
+    if cached_result:
+        return cached_result
+    
+    # Cache miss - fetch fresh data
+    logger.info("Cache miss - fetching fresh vendor comparison data")
     summaries = []
     
     for target_vendor in TARGET_VENDORS:
@@ -236,7 +290,23 @@ async def get_vendor_comparison(db: Session = Depends(get_database)):
             )
             summaries.append(empty_summary)
     
-    return VendorComparison(vendors=summaries)
+    comparison_result = VendorComparison(
+        vendors=summaries,
+        cached=False,
+        cache_timestamp=datetime.now()
+    )
+    
+    # Cache the result
+    _set_comparison_cache(comparison_result)
+    
+    return comparison_result
+
+
+@router.post("/cache/clear")
+async def clear_comparison_cache():
+    """Clear the vendor comparison cache"""
+    _invalidate_comparison_cache()
+    return {"message": "Comparison cache cleared successfully"}
 
 
 @router.post("/initialize-vendors")

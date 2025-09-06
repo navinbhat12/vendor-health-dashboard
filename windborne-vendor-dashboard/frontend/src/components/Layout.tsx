@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Building2, BarChart3, TrendingUp, Table } from "lucide-react";
+import { Building2, BarChart3, Table } from "lucide-react";
 
 interface LayoutProps {
   children: ReactNode;
@@ -55,16 +55,6 @@ export default function Layout({ children }: LayoutProps) {
                 <Table className="w-4 h-4" />
                 <span>Comparison</span>
               </Link>
-
-              <a
-                href="/api/v1/docs"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-secondary-400 hover:text-secondary-100 hover:bg-secondary-700 transition-colors"
-              >
-                <TrendingUp className="w-4 h-4" />
-                <span>API Docs</span>
-              </a>
             </nav>
           </div>
         </div>
