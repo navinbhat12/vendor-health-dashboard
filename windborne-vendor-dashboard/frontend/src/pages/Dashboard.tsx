@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { Download, RefreshCw } from "lucide-react";
-import { Link } from "react-router-dom";
 import VendorCard from "../components/VendorCard";
 import AddVendorCard from "../components/AddVendorCard";
 import { vendorApi } from "../services/api";
-import type { VendorComparison, VendorSummary } from "../types/vendor";
+import type { VendorComparison } from "../types/vendor";
 import { useDynamicVendors } from "../contexts/DynamicVendorsContext";
 
 export default function Dashboard() {
