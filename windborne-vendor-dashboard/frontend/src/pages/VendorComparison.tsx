@@ -240,7 +240,7 @@ const VendorComparison: React.FC = () => {
 
         <button
           onClick={exportToCSV}
-          className="btn btn-primary"
+          className="btn btn-primary px-6 py-3"
           disabled={loading || vendors.length === 0}
         >
           <Download className="w-4 h-4 mr-2" />
