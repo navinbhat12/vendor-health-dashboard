@@ -70,7 +70,7 @@ export default function Layout({ children }: LayoutProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="text-sm text-secondary-400">
-              © 2024 WindBorne Systems Vendor Health Dashboard
+              © 2025 WindBorne Systems Vendor Health Dashboard
             </div>
             <div className="text-sm text-secondary-500">
               Built with FastAPI + React + Alpha Vantage API
