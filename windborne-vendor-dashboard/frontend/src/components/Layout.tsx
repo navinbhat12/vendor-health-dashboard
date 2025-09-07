@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Building2, BarChart3, Table } from "lucide-react";
+import { BarChart3, Table } from "lucide-react";
 
 interface LayoutProps {
   children: ReactNode;
@@ -10,24 +10,18 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-secondary-900">
+    <div className="min-h-screen bg-black">
       {/* Header */}
-      <header className="bg-secondary-800 shadow-sm border-b border-secondary-700">
+      <header className="bg-secondary-100 shadow-sm border-b border-secondary-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo and Title */}
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-8 h-8 bg-primary-600 rounded-lg">
-                <Building2 className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-semibold text-secondary-100">
-                  WindBorne Systems
-                </h1>
-                <p className="text-sm text-secondary-400">
-                  Vendor Health Dashboard
-                </p>
-              </div>
+            {/* Logo */}
+            <div className="flex items-center">
+              <img
+                src="/windborne.svg"
+                alt="WindBorne Systems"
+                className="h-8 w-auto"
+              />
             </div>
 
             {/* Navigation */}
@@ -36,8 +30,8 @@ export default function Layout({ children }: LayoutProps) {
                 to="/"
                 className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   location.pathname === "/"
-                    ? "bg-primary-900 text-primary-200"
-                    : "text-secondary-400 hover:text-secondary-100 hover:bg-secondary-700"
+                    ? "bg-primary-600 text-white"
+                    : "text-secondary-600 hover:text-secondary-900 hover:bg-secondary-200"
                 }`}
               >
                 <BarChart3 className="w-4 h-4" />
@@ -48,8 +42,8 @@ export default function Layout({ children }: LayoutProps) {
                 to="/comparison"
                 className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   location.pathname === "/comparison"
-                    ? "bg-primary-900 text-primary-200"
-                    : "text-secondary-400 hover:text-secondary-100 hover:bg-secondary-700"
+                    ? "bg-primary-600 text-white"
+                    : "text-secondary-600 hover:text-secondary-900 hover:bg-secondary-200"
                 }`}
               >
                 <Table className="w-4 h-4" />
@@ -66,13 +60,13 @@ export default function Layout({ children }: LayoutProps) {
       </main>
 
       {/* Footer */}
-      <footer className="bg-secondary-800 border-t border-secondary-700 mt-16">
+      <footer className="bg-gray-900 border-t border-gray-800 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
-            <div className="text-sm text-secondary-400">
+            <div className="text-sm text-white">
               © 2025 WindBorne Systems Vendor Health Dashboard
             </div>
-            <div className="text-sm text-secondary-500">
+            <div className="text-sm text-gray-300">
               Built with FastAPI + React + Alpha Vantage API
             </div>
           </div>

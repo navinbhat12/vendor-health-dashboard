@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { AlertTriangle, Building } from "lucide-react";
+import { AlertTriangle, Building, X } from "lucide-react";
 import type { VendorSummary } from "../types/vendor";
 import {
   formatCurrency,
@@ -14,12 +14,16 @@ interface VendorCardProps {
   vendor: VendorSummary;
   onRefresh?: (ticker: string) => void;
   isRefreshing?: boolean;
+  onDelete?: (ticker: string) => void;
+  isDynamic?: boolean;
 }
 
 export default function VendorCard({
   vendor,
   onRefresh,
   isRefreshing,
+  onDelete,
+  isDynamic = false,
 }: VendorCardProps) {
   const hasFlags = vendor.liquidity_flag || vendor.leverage_flag;
 
@@ -62,13 +66,24 @@ export default function VendorCard({
           </div>
         </div>
 
-        {/* Flags */}
-        {hasFlags && (
-          <div className="flex items-center space-x-1">
-            <AlertTriangle className="w-4 h-4 text-warning-500" />
-            <span className="text-xs text-warning-600">Risk Flags</span>
-          </div>
-        )}
+        {/* Flags and Delete Button */}
+        <div className="flex items-center space-x-2">
+          {hasFlags && (
+            <div className="flex items-center space-x-1">
+              <AlertTriangle className="w-4 h-4 text-warning-500" />
+              <span className="text-xs text-warning-600">Risk Flags</span>
+            </div>
+          )}
+          {isDynamic && onDelete && (
+            <button
+              onClick={() => onDelete(vendor.ticker)}
+              className="p-1 text-secondary-400 hover:text-red-400 hover:bg-red-900/20 rounded transition-colors"
+              title="Remove vendor"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Financial Highlights */}

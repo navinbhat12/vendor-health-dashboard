@@ -5,10 +5,12 @@ import {
   ArrowDown,
   Download,
   RefreshCw,
+  X,
 } from "lucide-react";
 import { vendorApi } from "../services/api";
 import type { VendorSummary } from "../types/vendor";
 import { formatPercentageValue, formatNumber } from "../utils/formatters";
+import { useDynamicVendors } from "../contexts/DynamicVendorsContext";
 
 type SortDirection = "asc" | "desc" | null;
 type SortableField = keyof VendorSummary;
@@ -26,17 +28,26 @@ const VendorComparison: React.FC = () => {
     field: null,
     direction: null,
   });
+  const { dynamicVendors, removeDynamicVendor } = useDynamicVendors();
 
   useEffect(() => {
     loadVendorData();
   }, []);
+
+  // Reload data when dynamic vendors change
+  useEffect(() => {
+    if (dynamicVendors.length > 0 || vendors.length > 0) {
+      loadVendorData();
+    }
+  }, [dynamicVendors]);
 
   const loadVendorData = async () => {
     try {
       setLoading(true);
       setError(null);
       const comparison = await vendorApi.getVendorComparison();
-      setVendors(comparison.vendors);
+      // Combine main vendors with dynamic vendors
+      setVendors([...comparison.vendors, ...dynamicVendors]);
     } catch (err) {
       console.error("Failed to load vendor comparison:", err);
       setError("Failed to load vendor data");
@@ -357,13 +368,26 @@ const VendorComparison: React.FC = () => {
                 >
                   {/* Company Info */}
                   <td className="px-4 py-4">
-                    <div>
-                      <div className="font-semibold text-secondary-100">
-                        {vendor.name}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-semibold text-secondary-100">
+                          {vendor.name}
+                        </div>
+                        <div className="text-sm text-secondary-400">
+                          {vendor.ticker}
+                        </div>
                       </div>
-                      <div className="text-sm text-secondary-400">
-                        {vendor.ticker}
-                      </div>
+                      {dynamicVendors.some(
+                        (dv) => dv.ticker === vendor.ticker
+                      ) && (
+                        <button
+                          onClick={() => removeDynamicVendor(vendor.ticker)}
+                          className="p-1 text-secondary-400 hover:text-red-400 hover:bg-red-900/20 rounded transition-colors ml-2"
+                          title="Remove vendor"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
 

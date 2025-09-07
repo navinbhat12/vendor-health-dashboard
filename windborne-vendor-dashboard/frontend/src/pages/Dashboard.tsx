@@ -1,17 +1,19 @@
 import { useState, useEffect } from "react";
-import { Download, Table, RefreshCw } from "lucide-react";
+import { Download, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import VendorCard from "../components/VendorCard";
 import AddVendorCard from "../components/AddVendorCard";
 import { vendorApi } from "../services/api";
 import type { VendorComparison, VendorSummary } from "../types/vendor";
+import { useDynamicVendors } from "../contexts/DynamicVendorsContext";
 
 export default function Dashboard() {
   const [comparison, setComparison] = useState<VendorComparison | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [dynamicVendors, setDynamicVendors] = useState<VendorSummary[]>([]);
   const [addingVendor, setAddingVendor] = useState(false);
+  const { dynamicVendors, addDynamicVendor, removeDynamicVendor } =
+    useDynamicVendors();
 
   const loadComparison = async () => {
     try {
@@ -28,7 +30,6 @@ export default function Dashboard() {
       setLoading(false);
     }
   };
-
 
   const handleInitializeVendors = async () => {
     try {
@@ -99,11 +100,7 @@ export default function Dashboard() {
       }
 
       // Add to dynamic vendors list
-      setDynamicVendors((prev) => {
-        // Remove if already exists (in case of refresh)
-        const filtered = prev.filter((v) => v.ticker !== ticker);
-        return [...filtered, vendorSummary];
-      });
+      addDynamicVendor(vendorSummary);
     } catch (err) {
       console.error(`Failed to add vendor ${ticker}:`, err);
       // For now, just alert the user - in a real app you'd want a proper notification system
@@ -114,7 +111,6 @@ export default function Dashboard() {
       setAddingVendor(false);
     }
   };
-
 
   const exportToCSV = () => {
     if (!comparison?.vendors || comparison.vendors.length === 0) return;
@@ -150,9 +146,7 @@ export default function Dashboard() {
       vendor.total_revenue ? (vendor.total_revenue / 1e9).toFixed(1) : "N/A",
       vendor.net_income ? (vendor.net_income / 1e9).toFixed(1) : "N/A",
       vendor.total_assets ? (vendor.total_assets / 1e9).toFixed(1) : "N/A",
-      vendor.market_cap
-        ? (vendor.market_cap / 1e9).toFixed(1)
-        : "N/A",
+      vendor.market_cap ? (vendor.market_cap / 1e9).toFixed(1) : "N/A",
       vendor.current_ratio ? vendor.current_ratio.toFixed(2) : "N/A",
       vendor.quick_ratio ? vendor.quick_ratio.toFixed(2) : "N/A",
       vendor.debt_to_equity ? vendor.debt_to_equity.toFixed(2) : "N/A",
@@ -176,9 +170,7 @@ export default function Dashboard() {
     link.setAttribute("href", url);
     link.setAttribute(
       "download",
-      `windborne-vendor-dashboard-${
-        new Date().toISOString().split("T")[0]
-      }.csv`
+      `windborne-vendor-dashboard-${new Date().toISOString().split("T")[0]}.csv`
     );
     link.style.visibility = "hidden";
     document.body.appendChild(link);
@@ -237,16 +229,13 @@ export default function Dashboard() {
           </p>
         </div>
 
-        <div className="flex items-center space-x-3">
-          <Link to="/comparison" className="btn btn-primary">
-            <Table className="w-4 h-4 mr-2" />
-            View Comparison Table
-          </Link>
-
+        <div className="flex items-center">
           <button
             onClick={exportToCSV}
-            className="btn btn-primary"
-            disabled={loading || !comparison?.vendors || comparison.vendors.length === 0}
+            className="btn btn-primary px-6 py-3"
+            disabled={
+              loading || !comparison?.vendors || comparison.vendors.length === 0
+            }
           >
             <Download className="w-4 h-4 mr-2" />
             Export CSV
@@ -259,10 +248,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Target Vendors */}
           {comparison.vendors.map((vendor) => (
-            <VendorCard
-              key={vendor.ticker}
-              vendor={vendor}
-            />
+            <VendorCard key={vendor.ticker} vendor={vendor} />
           ))}
 
           {/* Dynamic Vendors */}
@@ -270,6 +256,8 @@ export default function Dashboard() {
             <VendorCard
               key={`dynamic-${vendor.ticker}`}
               vendor={vendor}
+              isDynamic={true}
+              onDelete={removeDynamicVendor}
             />
           ))}
 
@@ -305,10 +293,7 @@ export default function Dashboard() {
 
             {/* Dynamic Vendors */}
             {dynamicVendors.map((vendor) => (
-              <VendorCard
-                key={`dynamic-${vendor.ticker}`}
-                vendor={vendor}
-              />
+              <VendorCard key={`dynamic-${vendor.ticker}`} vendor={vendor} />
             ))}
           </div>
         </div>

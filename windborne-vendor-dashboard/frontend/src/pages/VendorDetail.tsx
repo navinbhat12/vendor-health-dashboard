@@ -266,7 +266,7 @@ export default function VendorDetail() {
       </div>
 
       {/* Key Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Current Financials */}
         <div className="card p-6">
           <h3 className="text-lg font-semibold text-secondary-100 mb-4">
@@ -365,43 +365,6 @@ export default function VendorDetail() {
             </div>
           </div>
         </div>
-
-        {/* Market Data */}
-        {overview && (
-          <div className="card p-6">
-            <h3 className="text-lg font-semibold text-secondary-100 mb-4">
-              Market Data
-            </h3>
-            <div className="space-y-3">
-              {overview.PERatio && (
-                <div>
-                  <p className="text-sm text-secondary-400">P/E Ratio</p>
-                  <p className="text-xl font-semibold text-secondary-100">
-                    {formatNumber(parseFloat(overview.PERatio), 2)}
-                  </p>
-                </div>
-              )}
-              {overview.DividendYield && (
-                <div>
-                  <p className="text-sm text-secondary-400">Dividend Yield</p>
-                  <p className="text-xl font-semibold text-secondary-100">
-                    {formatPercentageValue(
-                      parseFloat(overview.DividendYield) * 100
-                    )}
-                  </p>
-                </div>
-              )}
-              {overview["52WeekHigh"] && overview["52WeekLow"] && (
-                <div>
-                  <p className="text-sm text-secondary-400">52W Range</p>
-                  <p className="text-sm font-semibold text-secondary-100">
-                    ${overview["52WeekLow"]} - ${overview["52WeekHigh"]}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Balance Sheet Overview */}
