@@ -1,6 +1,6 @@
-# WindBorne Systems Vendor Health Dashboard
+# Vendor Health Dashboard
 
-A comprehensive financial analysis dashboard for evaluating potential vendors, built with FastAPI and React. This application provides real-time financial metrics, trend analysis, and vendor comparison capabilities to help WindBorne Systems make informed procurement decisions.
+A comprehensive financial analysis dashboard for evaluating potential vendors, built with FastAPI and React. This application provides real-time financial metrics, trend analysis, and vendor comparison capabilities to help organizations make informed procurement decisions.
 
 ## 🚀 Features
 
@@ -159,7 +159,6 @@ A comprehensive side-by-side analysis featuring:
 - **Alpha Vantage API**: Financial data provider
 - **Multiple API Keys**: Rate limiting mitigation through key rotation
 
-
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -173,5 +172,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 5. Open a Pull Request
 
 ---
-
-

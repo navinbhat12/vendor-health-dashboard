@@ -1,6 +1,6 @@
-# WindBorne Systems Vendor Health Dashboard
+# Vendor Health Dashboard
 
-A comprehensive financial analysis dashboard for evaluating potential vendors, built with FastAPI and React. This application provides real-time financial metrics, trend analysis, and vendor comparison capabilities to help WindBorne Systems make informed procurement decisions.
+A comprehensive financial analysis dashboard for evaluating potential vendors, built with FastAPI and React. This application provides real-time financial metrics, trend analysis, and vendor comparison capabilities to help organizations make informed procurement decisions.
 
 ## 🚀 Features
 
@@ -158,62 +158,6 @@ A comprehensive side-by-side analysis featuring:
 
 - **Alpha Vantage API**: Financial data provider
 - **Multiple API Keys**: Rate limiting mitigation through key rotation
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- Python 3.9+
-- Git
-
-### Installation
-
-1. **Clone the repository**
-
-   ```bash
-   git clone https://github.com/navinbhat12/windborne-swe.git
-   cd windborne-swe/windborne-vendor-dashboard
-   ```
-
-2. **Backend Setup**
-
-   ```bash
-   cd backend
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   cp env.example .env
-   # Add your Alpha Vantage API keys to .env
-   uvicorn app.main:app --reload
-   ```
-
-3. **Frontend Setup**
-
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
-
-4. **Access the Application**
-   - Frontend: http://localhost:5173
-   - Backend API: http://localhost:8000
-   - API Documentation: http://localhost:8000/docs
-
-### Environment Variables
-
-Create a `.env` file in the backend directory with:
-
-```
-ALPHA_VANTAGE_API_KEY=your_primary_key
-ALPHA_VANTAGE_API_KEY_1=your_backup_key_1
-ALPHA_VANTAGE_API_KEY_2=your_backup_key_2
-ALPHA_VANTAGE_API_KEY_3=your_backup_key_3
-ALPHA_VANTAGE_API_KEY_4=your_backup_key_4
-DATABASE_URL=sqlite:///./vendor_data.db
-FRONTEND_URL=http://localhost:5173
-```
 
 ## 📝 License
 
